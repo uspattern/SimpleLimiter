@@ -1,0 +1,8 @@
+name: SimpleLimiter
+version: '${project.version}'
+main: uk.pattern.simplelimiter.SimpleLimiter
+api-version: '1.20'
+commands:
+  slreload:
+    description: Reload SimpleLimiter config
+    usage: /slreload

@@ -1,0 +1,8 @@
+limits:
+  MOB: 10
+  VEHICLE: 5
+  ARMOR_STAND: 5
+
+ignored:
+  - FALLING_BLOCK
+  - DROPPED_ITEM
