@@ -1,6 +1,5 @@
 package uk.pattern.simplelimiter.Main;
 
-import org.bukkit.Chunk;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -42,70 +41,66 @@ public class LimitEnforcer implements Listener {
 
     private void enforceLimits(Entity entity) {
         EntityType type = entity.getType();
-
         Set<EntityType> ignoredEntities = configManager.getIgnoredEntities();
         if (ignoredEntities.contains(type)) return;
 
-        Chunk chunk = entity.getLocation().getChunk();
+        int radius = configManager.getCheckRadius();
+
+        // Все сущности рядом
+        Entity[] nearby = entity.getWorld().getNearbyEntities(entity.getLocation(), radius, radius, radius)
+                .toArray(new Entity[0]);
 
         Map<EntityType, Integer> specificLimits = configManager.getSpecificLimits();
         if (specificLimits.containsKey(type)) {
             int limit = specificLimits.get(type);
-            long count = Arrays.stream(chunk.getEntities())
+            long count = Arrays.stream(nearby)
                     .filter(e -> e.getType() == type)
                     .count();
-            if (count > limit) {
-                removeAnyEntityOfType(chunk, type);
+
+            if (count >= limit) {
+                for (Entity e : nearby) {
+                    if (e.getType() == type && e.getEntityId() != entity.getEntityId()) {
+                        e.remove();
+                        break;
+                    }
+                }
             }
             return;
         }
 
         int mobLimit = configManager.getMobLimit();
         if (mobLimit > -1 && entity instanceof LivingEntity && !(entity instanceof Player) && !(entity instanceof Vehicle)) {
-            long mobCount = Arrays.stream(chunk.getEntities())
+            long mobCount = Arrays.stream(nearby)
                     .filter(e -> e instanceof LivingEntity && !(e instanceof Player) && !(e instanceof Vehicle))
                     .count();
-            if (mobCount > mobLimit) {
-                removeAnyMob(chunk);
+
+            if (mobCount >= mobLimit) {
+                for (Entity e : nearby) {
+                    if (e instanceof LivingEntity && !(e instanceof Player) && !(e instanceof Vehicle)
+                            && e.getEntityId() != entity.getEntityId()) {
+                        e.remove();
+                        break;
+                    }
+                }
             }
             return;
         }
 
         int vehicleLimit = configManager.getVehicleLimit();
         if (vehicleLimit > -1 && entity instanceof Vehicle) {
-            long vehicleCount = Arrays.stream(chunk.getEntities())
+            long vehicleCount = Arrays.stream(nearby)
                     .filter(e -> e instanceof Vehicle)
                     .count();
-            if (vehicleCount > vehicleLimit) {
-                removeAnyVehicle(chunk);
-            }
-        }
-    }
 
-    private void removeAnyEntityOfType(Chunk chunk, EntityType type) {
-        for (Entity e : chunk.getEntities()) {
-            if (e.getType() == type) {
-                e.remove();
-                return;
-            }
-        }
-    }
-
-    private void removeAnyMob(Chunk chunk) {
-        for (Entity e : chunk.getEntities()) {
-            if (e instanceof LivingEntity && !(e instanceof Player) && !(e instanceof Vehicle)) {
-                e.remove();
-                return;
-            }
-        }
-    }
-
-    private void removeAnyVehicle(Chunk chunk) {
-        for (Entity e : chunk.getEntities()) {
-            if (e instanceof Vehicle) {
-                e.remove();
-                return;
+            if (vehicleCount >= vehicleLimit) {
+                for (Entity e : nearby) {
+                    if (e instanceof Vehicle && e.getEntityId() != entity.getEntityId()) {
+                        e.remove();
+                        break;
+                    }
+                }
             }
         }
     }
 }
+

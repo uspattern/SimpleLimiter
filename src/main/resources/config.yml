@@ -1,3 +1,4 @@
+check-radius: 16
 limits:
   MOB: 10
   VEHICLE: 5

@@ -81,4 +81,8 @@ public class ConfigManager {
     public Set<EntityType> getIgnoredEntities() {
         return ignoredEntities;
     }
+
+    public int getCheckRadius() {
+        return plugin.getConfig().getInt("check-radius", 16); // 16 — значение по умолчанию
+    }
 }
