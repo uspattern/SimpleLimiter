@@ -46,7 +46,6 @@ public class LimitEnforcer implements Listener {
 
         int radius = configManager.getCheckRadius();
 
-        // Все сущности рядом
         Entity[] nearby = entity.getWorld().getNearbyEntities(entity.getLocation(), radius, radius, radius)
                 .toArray(new Entity[0]);
 
